@@ -54,6 +54,7 @@ class LocationMapViewController: UIViewController, MKMapViewDelegate {
         // Set the map view delegate
         mapView.delegate = self
         deleteLabel.hidden = true
+        
         addSavedPinsToMap()
         
     }
@@ -114,8 +115,7 @@ class LocationMapViewController: UIViewController, MKMapViewDelegate {
             
             // Downloading photos for the new pin (only download if it is a new pin)
             FlickrClient.sharedInstance().downloadPhotosForPin(newPin) {
-                (success, error) in print("downloadPhotosForPin is success:\
-                    (success) - error:\(error)") }
+                (success, error) in print("downloadPhotosForPin is success:\(success) - error:\(error)") }
             // Find out the location name based on the coordinates
             let coordinates = CLLocation(latitude: annotation.coordinate.latitude, longitude: annotation.coordinate.longitude)
                 
@@ -147,7 +147,7 @@ class LocationMapViewController: UIViewController, MKMapViewDelegate {
             annotationView.canShowCallout = false
             
             return annotationView
-        }
+        
         
     }
     
@@ -162,29 +162,63 @@ class LocationMapViewController: UIViewController, MKMapViewDelegate {
         selectedPin = nil
         
         for pin in pins {
-            print("Deleting pin - verify core data is deleting as well")
-            sharedContext.deleteObject(selectedPin!)
             
-            // Deleting selected pin on map
-            self.mapView.removeAnnotation(annotation)
-            
-            // Save the changes to core data
-            CoreDataStackManager.sharedInstance().saveContext()
-        } else {
-            
-            if title != nil {
-                pin.pinTitle = title!
+            if annotation.coordinate.latitude == pin.latitude && annotation.coordinate.longitude == pin.longitude {
                 
-            } else {
-                pin.pinTitle = "This pin has no name"
+                selectedPin = pin
+                
+                if editingPins {
+            
+                    print("Deleting pin - verify core data is deleting as well")
+                    sharedContext.deleteObject(selectedPin!)
+            
+                    // Deleting selected pin on map
+                    self.mapView.removeAnnotation(annotation)
+            
+                    // Save the changes to core data
+                    CoreDataStackManager.sharedInstance().saveContext()
+                } else {
+            
+                    if title != nil {
+                        pin.pinTitle = title!
+                
+                    } else {
+                        pin.pinTitle = "This pin has no name"
+                    }
+                    // Move to the Phone Album View Controller
+                    self.performSegueWithIdentifier("PhotAlbum", sender: nil)
+                    }
             }
-            // Move to the Phone Album View Controller
-            self.performSegueWithIdentifier("PhotAlbum", sender: nil)
+            
+        }
+
+
+    }
+
+    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+        if (segue.identifier == "PhotoAlbum") {
+            let viewController = segue.destinationViewController as!
+                PhotoAlbumViewController
+            viewController.pin = selectedPin
         }
     }
 
+    // Change map type (satellite) via segmented control
 
+    @IBAction func segmentedControlAction(sender: UISegmentedControl) {
+        
+        switch (sender.selectedSegmentIndex) {
+        case 0:
+            mapView.mapType = .Standard
+        case 1:
+            mapView.mapType = .Satellite
+        case 2:
+            mapView.mapType = .Hybrid
+        default:
+            mapView.mapType = .Standard
+        }
     }
+}
 
 
 
