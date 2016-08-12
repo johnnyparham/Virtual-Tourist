@@ -112,7 +112,8 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
             bottomButton.hidden = true
             
             // If deleting flag is tru, delete the phot
-            if isDeleting == true {
+            if isDeleting == true
+            {
         
             // Removing the photo that user selected one by one
         for indexPath in selectedIndexofCollectionViewCells {
@@ -192,18 +193,20 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
         
         // Select the annotation so the title can be shown
         mapView.selectAnnotation(point, animated: true)
-}
+    }
+    
     // Return the number of photos from fetchedResultsController
     func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        let sectionInfo = self.fetchedResultsController.sections!
-        [section]
+        
+        let sectionInfo = self.fetchedResultsController.sections! [section]
         print("Number of photos returned from fetchedResultsController #\(sectionInfo.numberOfObjects)")
         
         // If numberOfObjects is not zero, hide the noImagesLabel
         noImagesLabel.hidden = sectionInfo.numberOfObjects != 0
         
         return sectionInfo.numberOfObjects
-}
+    }
+
     @IBAction func editButtonTapped(sender: AnyObject) {
         
         if editingFlag == false {

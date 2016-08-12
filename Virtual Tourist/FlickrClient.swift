@@ -49,6 +49,28 @@ class FlickrClient: NSObject {
         task.resume()
     }
     
+    // MARK: POST
+    func taskForGETMethod(urlString: String, completionHandler: (result: NSData?, error: NSError?) -> Void)
+    {
+        
+        // Create the request
+        let request = NSMutableURLRequest(URL: NSURL(string: urlString)!)
+        
+        // Make the request
+        let task = session.dataTaskWithRequest(request) {
+            data, response, downloadError in
+            
+            if let error = downloadError {
+                let newError = FlickrClient.errorForResponse(data, response: response, error: error)
+                completionHandler(result: data, error: nil)
+            }
+        }
+        
+        // Start the request
+        task.resume()
+        
+    }
+    
     //MARK: - Helpers
     
     // Substitute the key for the value that is contained within the method name
