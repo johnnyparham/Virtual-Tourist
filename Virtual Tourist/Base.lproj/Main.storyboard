@@ -3,6 +3,7 @@
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="10085"/>
+        <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
     </dependencies>
     <scenes>
         <!--Virtual Tourist-->
@@ -17,35 +18,61 @@
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <mapView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" fixedFrame="YES" mapType="standard" translatesAutoresizingMaskIntoConstraints="NO" id="OCh-te-laf">
+                            <mapView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" mapType="standard" translatesAutoresizingMaskIntoConstraints="NO" id="OCh-te-laf">
                                 <rect key="frame" x="20" y="72" width="560" height="470"/>
                             </mapView>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Tap Pins to Delete" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ean-LR-nj6" userLabel="Delete Label">
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Tap Pins to Delete" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ean-LR-nj6" userLabel="Delete Label">
                                 <rect key="frame" x="20" y="550" width="560" height="30"/>
                                 <color key="backgroundColor" red="1" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="30" id="1Na-7l-68Y"/>
+                                </constraints>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <stackView opaque="NO" contentMode="scaleToFill" fixedFrame="YES" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="ygk-2e-zlZ">
+                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="ygk-2e-zlZ">
                                 <rect key="frame" x="194" y="468" width="212" height="28"/>
                                 <subviews>
-                                    <segmentedControl opaque="NO" contentMode="scaleToFill" ambiguous="YES" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="MKK-lE-YUt" userLabel="Standard, Satellite, Hybrid">
+                                    <segmentedControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="MKK-lE-YUt" userLabel="Standard, Satellite, Hybrid">
                                         <rect key="frame" x="0.0" y="0.0" width="212" height="29"/>
                                         <segments>
                                             <segment title="Standard"/>
                                             <segment title="Satellite"/>
                                             <segment title="Hybrid"/>
                                         </segments>
+                                        <connections>
+                                            <action selector="segmentedControlAction:" destination="BYZ-38-t0r" eventType="valueChanged" id="8s7-Q2-w0b"/>
+                                        </connections>
                                     </segmentedControl>
                                 </subviews>
                             </stackView>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstItem="ean-LR-nj6" firstAttribute="top" secondItem="OCh-te-laf" secondAttribute="bottom" constant="8" symbolic="YES" id="05Q-kQ-Yb1"/>
+                            <constraint firstItem="ean-LR-nj6" firstAttribute="top" secondItem="ygk-2e-zlZ" secondAttribute="bottom" constant="54" id="1oB-RX-Z2R"/>
+                            <constraint firstItem="OCh-te-laf" firstAttribute="leading" secondItem="ean-LR-nj6" secondAttribute="leading" id="B2G-fe-7JR"/>
+                            <constraint firstItem="ygk-2e-zlZ" firstAttribute="centerX" secondItem="ean-LR-nj6" secondAttribute="centerX" id="DdY-W8-i4c"/>
+                            <constraint firstItem="OCh-te-laf" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" constant="8" symbolic="YES" id="IVV-NL-MVz"/>
+                            <constraint firstItem="OCh-te-laf" firstAttribute="trailing" secondItem="ean-LR-nj6" secondAttribute="trailing" id="UhR-Yo-LCB"/>
+                            <constraint firstItem="OCh-te-laf" firstAttribute="trailing" secondItem="8bC-Xf-vdC" secondAttribute="trailingMargin" id="WYz-rA-0qE"/>
+                            <constraint firstAttribute="bottom" secondItem="ean-LR-nj6" secondAttribute="bottom" constant="20" symbolic="YES" id="bR2-UH-WYD"/>
+                            <constraint firstItem="OCh-te-laf" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" id="cUf-QC-WVZ"/>
+                        </constraints>
                     </view>
                     <navigationItem key="navigationItem" title="Virtual Tourist" id="DrP-SI-Vb6" userLabel="Edit Button">
-                        <barButtonItem key="rightBarButtonItem" systemItem="edit" id="BUn-Id-tbu"/>
+                        <barButtonItem key="rightBarButtonItem" systemItem="edit" id="BUn-Id-tbu">
+                            <connections>
+                                <action selector="editClicked:" destination="BYZ-38-t0r" id="dVa-0O-Efw"/>
+                            </connections>
+                        </barButtonItem>
                     </navigationItem>
+                    <connections>
+                        <outlet property="deleteLabel" destination="ean-LR-nj6" id="ayu-cC-vMt"/>
+                        <outlet property="editButton" destination="DrP-SI-Vb6" id="98F-wD-C4K"/>
+                        <outlet property="mapView" destination="OCh-te-laf" id="31o-v6-2eP"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
