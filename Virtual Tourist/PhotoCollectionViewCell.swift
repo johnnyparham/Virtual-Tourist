@@ -18,8 +18,11 @@ class PhotoCollectionViewCell: UICollectionViewCell {
     @IBOutlet weak var deleteButton: UIButton!
     
     override func prepareForReuse() {
+        
+        super.prepareForReuse()
+        
         if photoView.image == nil {
-            activityIndicator.stopAnimating()
+            activityIndicator.startAnimating()
         }
     }
 

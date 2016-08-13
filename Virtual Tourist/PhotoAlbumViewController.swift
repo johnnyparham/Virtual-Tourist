@@ -116,16 +116,16 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
             {
         
             // Removing the photo that user selected one by one
-        for indexPath in selectedIndexofCollectionViewCells {
+            for indexPath in selectedIndexofCollectionViewCells {
             
-            // Get photo associated with the indexPath.
-            let photo = fetchedResultsController.objectAtIndexPath(indexPath) as! Photos
+                // Get photo associated with the indexPath.
+                let photo = fetchedResultsController.objectAtIndexPath(indexPath) as! Photos
             
-            print("Deleting this -- \(photo)")
+                print("Deleting this -- \(photo)")
             
-            // Remove the photo
-            sharedContext.deleteObject(photo)
-        }
+                // Remove the photo
+                sharedContext.deleteObject(photo)
+            }
         
         // Empty the array of indexPath after deletion
         selectedIndexofCollectionViewCells.removeAll()
@@ -156,7 +156,7 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
         CoreDataStackManager.sharedInstance().saveContext()
         
         // 3. Download a new set of photos with the current pin
-        FlickrClient.sharedInstance().downloadPhotosForPin (pin!, completionHandler: {
+        FlickrClient.sharedInstance().downloadPhotosForPin(pin!, completionHandler: {
             success, error in
             
             if success {
@@ -223,7 +223,9 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
 }
     // Remove photos from an album when user selects a cell or multiple cells
     func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
+        
         if editingFlag == false {
+            
             let myImageViewPage: ImageScrollView = self.storyboard?.instantiateViewControllerWithIdentifier("ImageScrollView") as! ImageScrollView
             let photo = fetchedResultsController.objectAtIndexPath(indexPath) as! Photos
             

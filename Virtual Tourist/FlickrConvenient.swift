@@ -56,14 +56,14 @@ extension FlickrClient {
                     for photoDictionary in photosArray {
                         
                         guard let photoURLString = photoDictionary[URLValues.URLMediumPhoto] as? String else {
-                            print("error, photoDictionary)");continue
-                        }
+                            print("error, photoDictionary)");continue}
                         
                         // Create the Photos model
                         let newPhoto = Photos(photoURL: photoURLString, pin: pin, context: self.sharedContext)
                         
                         // Download photo by url
-                        self.downloadPhotoImage(newPhoto, completionHandler: {
+                        self.downloadPhotoImage(newPhoto, completionHandler:
+                            {
                             success, error in
                             
                             self.numberOfPhotoDownloaded -= 1

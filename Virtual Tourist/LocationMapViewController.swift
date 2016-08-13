@@ -112,6 +112,9 @@ class LocationMapViewController: UIViewController, MKMapViewDelegate {
             
             // Adding the newPin to the pins array
             pins.append(newPin)
+
+            // Adding the newPin to the map
+            mapView.addAnnotation(annotation)
             
             // Downloading photos for the new pin (only download if it is a new pin)
             FlickrClient.sharedInstance().downloadPhotosForPin(newPin) {
@@ -186,7 +189,7 @@ class LocationMapViewController: UIViewController, MKMapViewDelegate {
                         pin.pinTitle = "This pin has no name"
                     }
                     // Move to the Phone Album View Controller
-                    self.performSegueWithIdentifier("PhotAlbum", sender: nil)
+                    self.performSegueWithIdentifier("PhotoAlbum", sender: nil)
                     }
             }
             

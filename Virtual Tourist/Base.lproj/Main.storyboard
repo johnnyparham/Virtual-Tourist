@@ -62,7 +62,7 @@
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" title="Virtual Tourist" id="DrP-SI-Vb6" userLabel="Edit Button">
-                        <barButtonItem key="rightBarButtonItem" systemItem="edit" id="BUn-Id-tbu">
+                        <barButtonItem key="rightBarButtonItem" title="Edit" id="BUn-Id-tbu">
                             <connections>
                                 <action selector="editClicked:" destination="BYZ-38-t0r" id="dVa-0O-Efw"/>
                             </connections>
@@ -72,7 +72,7 @@
                         <outlet property="deleteLabel" destination="ean-LR-nj6" id="ayu-cC-vMt"/>
                         <outlet property="editButton" destination="DrP-SI-Vb6" id="98F-wD-C4K"/>
                         <outlet property="mapView" destination="OCh-te-laf" id="31o-v6-2eP"/>
-                        <segue destination="ani-bT-DVs" kind="push" identifier="PhotoAlbum" id="m3Z-AC-71Z"/>
+                        <segue destination="ani-bT-DVs" kind="show" identifier="PhotoAlbum" id="lzm-8Z-OQH"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
@@ -100,7 +100,7 @@
                             <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="0DW-1T-S3F">
                                 <rect key="frame" x="20" y="224" width="553" height="324"/>
                                 <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="10" minimumInteritemSpacing="10" id="GSN-Nm-J8u">
-                                    <size key="itemSize" width="150" height="89"/>
+                                    <size key="itemSize" width="139" height="89"/>
                                     <size key="headerReferenceSize" width="0.0" height="0.0"/>
                                     <size key="footerReferenceSize" width="0.0" height="0.0"/>
                                     <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
@@ -113,36 +113,41 @@
                                     <nil key="highlightedColor"/>
                                 </label>
                                 <cells>
-                                    <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="PhotoCollectionViewCell" id="RVK-CK-cmj">
-                                        <rect key="frame" x="0.0" y="0.0" width="150" height="89"/>
+                                    <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="PhotoCollectionViewCell" id="RVK-CK-cmj" customClass="PhotoCollectionViewCell" customModule="Virtual_Tourist" customModuleProvider="target">
+                                        <rect key="frame" x="0.0" y="0.0" width="139" height="89"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                         <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
-                                            <rect key="frame" x="0.0" y="0.0" width="150" height="89"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="139" height="89"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" style="gray" translatesAutoresizingMaskIntoConstraints="NO" id="Zgg-EN-0hV" userLabel="Activity Indicator">
                                                     <rect key="frame" x="65" y="35" width="20" height="20"/>
                                                 </activityIndicatorView>
-                                                <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="0Vv-zO-MOa" userLabel="Photo View">
-                                                    <rect key="frame" x="0.0" y="0.0" width="150" height="89"/>
-                                                </imageView>
                                                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="IJs-D0-ufW" userLabel="Delete Button">
                                                     <rect key="frame" x="52" y="30" width="46" height="30"/>
                                                     <state key="normal" title="Button"/>
                                                 </button>
+                                                <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="0Vv-zO-MOa" userLabel="Photo View">
+                                                    <rect key="frame" x="8" y="8" width="123" height="73"/>
+                                                </imageView>
                                             </subviews>
                                             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                         </view>
                                         <constraints>
                                             <constraint firstItem="IJs-D0-ufW" firstAttribute="centerX" secondItem="Zgg-EN-0hV" secondAttribute="centerX" id="1iF-sl-H7t"/>
-                                            <constraint firstAttribute="bottom" secondItem="0Vv-zO-MOa" secondAttribute="bottom" id="UDP-S5-Qbz"/>
-                                            <constraint firstAttribute="trailing" secondItem="0Vv-zO-MOa" secondAttribute="trailing" id="Vav-h1-HA3"/>
-                                            <constraint firstItem="0Vv-zO-MOa" firstAttribute="top" secondItem="RVK-CK-cmj" secondAttribute="top" id="cQf-Qh-QL3"/>
+                                            <constraint firstAttribute="bottom" secondItem="0Vv-zO-MOa" secondAttribute="bottom" constant="8" id="UDP-S5-Qbz"/>
+                                            <constraint firstAttribute="trailing" secondItem="0Vv-zO-MOa" secondAttribute="trailing" constant="8" id="Vav-h1-HA3"/>
+                                            <constraint firstItem="0Vv-zO-MOa" firstAttribute="top" secondItem="RVK-CK-cmj" secondAttribute="top" constant="8" id="cQf-Qh-QL3"/>
                                             <constraint firstItem="IJs-D0-ufW" firstAttribute="centerY" secondItem="Zgg-EN-0hV" secondAttribute="centerY" id="fMv-sX-8Si"/>
-                                            <constraint firstItem="0Vv-zO-MOa" firstAttribute="centerX" secondItem="Zgg-EN-0hV" secondAttribute="centerX" id="qMe-nP-EHC"/>
-                                            <constraint firstItem="0Vv-zO-MOa" firstAttribute="leading" secondItem="RVK-CK-cmj" secondAttribute="leading" id="xCW-Ib-6yO"/>
+                                            <constraint firstItem="0Vv-zO-MOa" firstAttribute="centerX" secondItem="Zgg-EN-0hV" secondAttribute="centerX" constant="-5.5" id="qMe-nP-EHC"/>
+                                            <constraint firstItem="0Vv-zO-MOa" firstAttribute="leading" secondItem="RVK-CK-cmj" secondAttribute="leading" constant="8" id="xCW-Ib-6yO"/>
                                             <constraint firstItem="0Vv-zO-MOa" firstAttribute="centerY" secondItem="IJs-D0-ufW" secondAttribute="centerY" id="xSA-er-yZx"/>
                                         </constraints>
+                                        <connections>
+                                            <outlet property="activityIndicator" destination="Zgg-EN-0hV" id="qLU-09-qjE"/>
+                                            <outlet property="deleteButton" destination="IJs-D0-ufW" id="6gc-8r-Ysj"/>
+                                            <outlet property="photoView" destination="0Vv-zO-MOa" id="P3Q-Lp-rMQ"/>
+                                        </connections>
                                     </collectionViewCell>
                                 </cells>
                             </collectionView>
@@ -173,7 +178,7 @@
                     </view>
                     <toolbarItems/>
                     <navigationItem key="navigationItem" id="BfQ-Xh-ve7">
-                        <barButtonItem key="rightBarButtonItem" systemItem="edit" id="N1e-jt-Utq">
+                        <barButtonItem key="rightBarButtonItem" title="Edit" id="N1e-jt-Utq">
                             <connections>
                                 <action selector="editButtonTapped:" destination="ani-bT-DVs" id="Wk1-gL-5iT"/>
                             </connections>
@@ -195,7 +200,7 @@
         <!--Image Detail-->
         <scene sceneID="BpS-fL-07L">
             <objects>
-                <viewController id="tEZ-fe-Yhi" userLabel="Image Detail" customClass="ImageScrollView" customModule="Virtual_Tourist" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="ImageScrollView" id="tEZ-fe-Yhi" userLabel="Image Detail" customClass="ImageScrollView" customModule="Virtual_Tourist" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="FMk-7Q-hZp"/>
                         <viewControllerLayoutGuide type="bottom" id="56o-xP-caC"/>
@@ -222,7 +227,7 @@
         <!--Navigation Controller-->
         <scene sceneID="Ctf-od-3Ik">
             <objects>
-                <navigationController automaticallyAdjustsScrollViewInsets="NO" id="0eG-ya-zqY" sceneMemberID="viewController">
+                <navigationController id="0eG-ya-zqY" sceneMemberID="viewController">
                     <toolbarItems/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="atm-pQ-D1N">
                         <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
@@ -254,23 +259,6 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="VV4-Sn-Ojp" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="2300" y="349"/>
-        </scene>
-        <!--View Controller-->
-        <scene sceneID="uQ7-Se-Hzp">
-            <objects>
-                <viewController id="JgS-er-e9j" sceneMemberID="viewController">
-                    <layoutGuides>
-                        <viewControllerLayoutGuide type="top" id="jhI-2h-mpY"/>
-                        <viewControllerLayoutGuide type="bottom" id="ehg-8y-3bm"/>
-                    </layoutGuides>
-                    <view key="view" contentMode="scaleToFill" id="3Sa-xf-Qlh">
-                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                    </view>
-                </viewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="9cC-lb-Fc6" userLabel="First Responder" sceneMemberID="firstResponder"/>
-            </objects>
         </scene>
     </scenes>
 </document>
