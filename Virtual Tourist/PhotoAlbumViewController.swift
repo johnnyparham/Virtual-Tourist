@@ -10,309 +10,294 @@ import UIKit
 import MapKit
 import CoreData
 
-class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, NSFetchedResultsControllerDelegate, UICollectionViewDelegate, UICollectionViewDataSource {
+import Foundation
+import MapKit
+import CoreData
+
+class PhotoAlbumViewController: BaseViewController, UICollectionViewDataSource, UICollectionViewDelegate, NSFetchedResultsControllerDelegate {
     
-    var pin: Pin? = nil
-    
-    // Flag for deleting pictures
-    var isDeleting = false
-    
-    var editingFlag = false
+    var pin: Pin!
     
     @IBOutlet weak var mapView: MKMapView!
-    @IBOutlet weak var bottomButton: UIButton!
+    @IBOutlet weak var newCollection: UIBarButtonItem!
     @IBOutlet weak var collectionView: UICollectionView!
-    @IBOutlet weak var noImagesLabel: UILabel!
-    @IBOutlet weak var editButton: UIBarButtonItem!
+    @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
+    @IBOutlet weak var emptyLabel: UILabel!
     
-    // Array of IndexPath - keeping track of index of selected cells
-    var selectedIndexofCollectionViewCells = [NSIndexPath]()
+    // Keep the changes. We will keep track of insertions and deletions
+    var insertedIndexPaths: [NSIndexPath]!
+    var deletedIndexPaths: [NSIndexPath]!
+    var updatedIndexPaths: [NSIndexPath]!
     
-    // MARK: - Core Data Convenience
-    
-    var sharedContext: NSManagedObjectContext {
-        return CoreDataStackManager.sharedInstance().managedObjectContext
-    }
-    
-    // MARK: - Fetched Results Controller
-    
-    // Lazily computed property pointing to the Photos entity objects, sorted by title, predicated on the pin.
-    lazy var fetchedResultsController: NSFetchedResultsController = {
+    // fetched results to get the photos from the core data
+    lazy var fetchedPhotosResultsController: NSFetchedResultsController = {
         
-        // Create fetch request for photos which match the sent Pin.
-        let fetchRequest = NSFetchRequest(entityName: "Photos")
+        let fetchRequest = NSFetchRequest(entityName: "Photo")
+        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "id", ascending: true)]
+        fetchRequest.predicate = NSPredicate(format: "pin == %@", self.pin);
         
-        // Limit the fetch request to just those phots related to the Pin.
-        fetchRequest.predicate = NSPredicate(format: "pin == %@", self.pin!)
+        let fetchedPhotosResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: self.sharedContext, sectionNameKeyPath: nil,cacheName: nil)
         
-        // Sort the fetch request by title, ascending.
-        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "title", ascending: true)]
+        return fetchedPhotosResultsController
         
-        // Create fetched results controller with the new fetch request.
-        let fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: self.sharedContext, sectionNameKeyPath: nil, cacheName: nil)
-        
-        return fetchedResultsController
     }()
     
-    // MARK: - Life Cycle
+    // MARK: Lifecycle functions
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        bottomButton.hidden = false
-        noImagesLabel.hidden = true
+        initializeMap()
         
-        mapView.delegate = self
-        
-        // Load the map
-        loadMapView()
-        
-        collectionView.delegate = self
-        collectionView.dataSource = self
-        
-        // Perform the fetch
+        // load saved pins
         do {
-            try fetchedResultsController.performFetch()
-        } catch let error as NSError {
-            print("\(error)")
+            try fetchedPhotosResultsController.performFetch()
+        } catch {
+            showErrorAlert("Failed to load the saved photos.")
         }
         
-        // Set the delegate to this view controller
-        fetchedResultsController.delegate = self
-        
-        // Subscribe to notification so phots can be reloaded 
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(PhotoAlbumViewController.photoReload(_:)), name: "downloadPhotoImage.done", object: nil)
-
+        fetchedPhotosResultsController.delegate = self
     }
-    // Inserting dispatch_async to ensure the closure that always runs in the main thread
-        func photoReload(notification: NSNotification) {
-            dispatch_async(dispatch_get_main_queue(), {
-                self.collectionView.reloadData()
-                
-                // If no photos remaining, show the "New Collection" button
-                let numberRemaining = FlickrClient.sharedInstance().numberOfPhotoDownloaded
-                print("numberRemaining is from photoReload \(numberRemaining)")
-                if numberRemaining <= 0 {
-                    self.bottomButton.hidden = false
-                }
-            })
+    
+    override func viewWillAppear(animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        if pin.photos.isEmpty {
+            requestPhotosFromAPI()
+        } else {
+            endLoading(true)
         }
+    }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
         
-        private func reFetch() {
-            do {
-                try fetchedResultsController.performFetch()
-            } catch let error as NSError {
-                print("reFetch - \(error)")
-            }
-        }
+        // Layout the collection view so that cells take up 1/3 of the width,
+        // with no space in between.
+        let layout : UICollectionViewFlowLayout = UICollectionViewFlowLayout()
+        layout.sectionInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
+        layout.minimumLineSpacing = 0
+        layout.minimumInteritemSpacing = 0
         
-        // Note: 'new' images might overlap with previous collectoin of images
-        @IBAction func bottomButtonTapped(sender: UIButton) {
-            
-            // Hiding the button once it's tapped, because I want to finish either deleting or reloading first
-            bottomButton.hidden = true
-            
-            // If deleting flag is tru, delete the phot
-            if isDeleting == true
-            {
+        let width = floor(self.collectionView.frame.size.width/3)
+        layout.itemSize = CGSize(width: width, height: width)
+        collectionView.collectionViewLayout = layout
+    }
+    
+    // MARK: IBAction functions
+    
+    @IBAction func newCollectionActionClick(sender: UIBarButtonItem) {
         
-            // Removing the photo that user selected one by one
-            for indexPath in selectedIndexofCollectionViewCells {
-            
-                // Get photo associated with the indexPath.
-                let photo = fetchedResultsController.objectAtIndexPath(indexPath) as! Photos
-            
-                print("Deleting this -- \(photo)")
-            
-                // Remove the photo
-                sharedContext.deleteObject(photo)
-            }
+        // let's delete all photos from the core data and disk
+        let photosToDelete = fetchedPhotosResultsController.fetchedObjects
         
-        // Empty the array of indexPath after deletion
-        selectedIndexofCollectionViewCells.removeAll()
-        
-        // Save the changes to core data
-        CoreDataStackManager.sharedInstance().saveContext()
-        
-        // Update cells
-        reFetch()
-        collectionView.reloadData()
-        
-        // Change the button to say'New Collection' after deletion
-        bottomButton.setTitle("New Collection", forState: UIControlState.Normal)
-        bottomButton.hidden = false
-        
-        isDeleting = false
-        
-        // Else "New Collection" button is tapped
-
-    } else {
-        
-        // 1. Empty the photo album from the previous set
-        for photo in fetchedResultsController.fetchedObjects as! [Photos] {
+        for item in photosToDelete! {
+            let photo = item as! Photo
             sharedContext.deleteObject(photo)
         }
         
-        // 2. Save the changes to core data
-        CoreDataStackManager.sharedInstance().saveContext()
+        saveContext()
         
-        // 3. Download a new set of photos with the current pin
-        FlickrClient.sharedInstance().downloadPhotosForPin(pin!, completionHandler: {
-            success, error in
+        // request a new sorted set of photos
+        requestPhotosFromAPI()
+    }
+    
+    // MARK: Fetched results functions
+    
+    func controllerWillChangeContent(controller: NSFetchedResultsController) {
+        insertedIndexPaths = [NSIndexPath]()
+        deletedIndexPaths = [NSIndexPath]()
+        updatedIndexPaths = [NSIndexPath]()
+    }
+    
+    func controller(controller: NSFetchedResultsController,
+                    didChangeObject anObject: AnyObject, atIndexPath indexPath: NSIndexPath?,
+                                    forChangeType type: NSFetchedResultsChangeType, newIndexPath: NSIndexPath?) {
+        
+        switch type{
             
-            if success {
-                dispatch_async(dispatch_get_main_queue(), {
-                    CoreDataStackManager.sharedInstance().saveContext()
-                })
-            } else {
-                dispatch_async(dispatch_get_main_queue(), {
-                    print("error downloading a new set of photos")
-                    self.bottomButton.hidden = false
-                })
+        case .Insert:
+            insertedIndexPaths.append(newIndexPath!)
+            break
+            
+        case .Delete:
+            deletedIndexPaths.append(indexPath!)
+            
+            let photo = anObject as! Photo
+            if !photo.deletePhotoAtDisk() {
+                showErrorAlert("Failed to delete image!")
             }
-            // Update cells
-            dispatch_async(dispatch_get_main_queue(), {
-                self.reFetch()
-                self.collectionView.reloadData()
-            })
-        })
-    
-    
-    }
-}
-
-// Load map view for the current pin
-
-    func loadMapView() {
-        
-        let point = MKPointAnnotation()
-        
-        point.coordinate = CLLocationCoordinate2DMake((pin?.latitude)!, (pin?.longitude)!)
-        point.title = pin?.pinTitle
-        mapView.addAnnotation(point)
-        mapView.centerCoordinate = point.coordinate
-        
-        // Select the annotation so the title can be shown
-        mapView.selectAnnotation(point, animated: true)
+            break
+            
+        case .Update:
+            updatedIndexPaths.append(indexPath!)
+            break
+            
+        default:
+            break
+        }
     }
     
-    // Return the number of photos from fetchedResultsController
+    func controllerDidChangeContent(controller: NSFetchedResultsController) {
+        
+        collectionView.performBatchUpdates({() -> Void in
+            
+            for indexPath in self.insertedIndexPaths {
+                self.collectionView.insertItemsAtIndexPaths([indexPath])
+            }
+            
+            for indexPath in self.deletedIndexPaths {
+                self.collectionView.deleteItemsAtIndexPaths([indexPath])
+            }
+            
+            for indexPath in self.updatedIndexPaths {
+                self.collectionView.reloadItemsAtIndexPaths([indexPath])
+            }
+            
+            }, completion: nil)
+    }
+    
+    // MARK: Collection view functions
+    
+    func numberOfSectionsInCollectionView(collectionView: UICollectionView) -> Int {
+        return fetchedPhotosResultsController.sections?.count ?? 0
+    }
+    
     func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        
-        let sectionInfo = self.fetchedResultsController.sections! [section]
-        print("Number of photos returned from fetchedResultsController #\(sectionInfo.numberOfObjects)")
-        
-        // If numberOfObjects is not zero, hide the noImagesLabel
-        noImagesLabel.hidden = sectionInfo.numberOfObjects != 0
-        
-        return sectionInfo.numberOfObjects
-    }
-
-    @IBAction func editButtonTapped(sender: AnyObject) {
-        
-        if editingFlag == false {
-            editingFlag = true
-            navigationItem.rightBarButtonItem?.title = "Done"
-            bottomButton.setTitle("Tap photos to delete", forState: UIControlState.Normal)
-        }
-        
-        else if editingFlag {
-            navigationItem.rightBarButtonItem?.title = "Edit"
-            editingFlag = false
-            bottomButton.hidden = false
-        }
-}
-    // Remove photos from an album when user selects a cell or multiple cells
-    func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
-        
-        if editingFlag == false {
-            
-            let myImageViewPage: ImageScrollView = self.storyboard?.instantiateViewControllerWithIdentifier("ImageScrollView") as! ImageScrollView
-            let photo = fetchedResultsController.objectAtIndexPath(indexPath) as! Photos
-            
-            // Pass the selected image
-            myImageViewPage.selectedImage = photo.url!
-            
-            self.navigationController?.pushViewController(myImageViewPage, animated: true)
-        }
-        
-        else if (editingFlag) {
-            
-            // Configure the UI of the collection item
-            let cell = collectionView.cellForItemAtIndexPath(indexPath) as! PhotoCollectionViewCell
-            
-            // When user deselct the cell, remove it from the selectedIndexofCollectionViewCells array
-            if let index = selectedIndexofCollectionViewCells.indexOf(indexPath) {
-                selectedIndexofCollectionViewCells.removeAtIndex(index)
-                cell.deleteButton.hidden = true
-            } else {
-                // Else, add it to the selectedIndexofCollectionViewCells array
-                selectedIndexofCollectionViewCells.append(indexPath)
-                cell.deleteButton.hidden = false
-                bottomButton.setTitle("New Collection", forState: UIControlState.Normal)
-            }
-            
-            // If the selectedIndexofCollectionViewCells array is not empty, show the 'Delete # photo(s)' button
-            if selectedIndexofCollectionViewCells.count > 0 {
-                
-                print("Delete array has \(selectedIndexofCollectionViewCells.count) photo(s).")
-                if selectedIndexofCollectionViewCells.count == 1{
-                    bottomButton.setTitle("Delete \(selectedIndexofCollectionViewCells.count) photo", forState: UIControlState.Normal)
-                } else {
-                    bottomButton.setTitle("Delete \(selectedIndexofCollectionViewCells.count) photos", forState: UIControlState.Normal)
-                }
-                isDeleting = true
-            } else{
-                bottomButton.setTitle("New Collection", forState: UIControlState.Normal)
-                isDeleting = false
-            }
-            
-        } // End of else if editingFlag = true
-        
+        return fetchedPhotosResultsController.sections![section].numberOfObjects
     }
     
-    // The cell that is returned must be retrieved from a call to -dequeueReusableCellWithReuseIdentifier:forIndexPath:
-    func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell{
+    func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
         
-        let cell = collectionView.dequeueReusableCellWithReuseIdentifier("PhotoCollectionViewCell", forIndexPath: indexPath) as! PhotoCollectionViewCell
-        let photo = fetchedResultsController.objectAtIndexPath(indexPath) as! Photos
-        //print("Photo URL from the collection view is \(photo.url)")
+        let photo = fetchedPhotosResultsController.objectAtIndexPath(indexPath) as! Photo
         
-        cell.photoView.image = photo.image
+        let cell = collectionView.dequeueReusableCellWithReuseIdentifier("PhotoCellView", forIndexPath: indexPath) as! PhotoCell
+        cell.photo.image = UIImage(named: "placeholder")
         
-        cell.deleteButton.hidden = true
-        cell.deleteButton.layer.setValue(indexPath, forKey: "indexPath")
-        
-        // Trigger the action 'deletePhoto' when the button is tapped
-        cell.deleteButton.addTarget(self, action: #selector(PhotoAlbumViewController.deletePhoto(_:)), forControlEvents: UIControlEvents.TouchUpInside)
+        if photo.url == "" {
+            cell.photo.image = UIImage(named: "noImage")
+            
+        } else if photo.photoImage != nil {
+            cell.photo.image = photo.photoImage
+            
+        } else {
+            
+            let task = FlickrAPI.sharedInstance().downloadImageOf(photo.url as? String) { (data, error) in
+                
+                let image: UIImage!
+                
+                guard error == nil else {
+                    image = UIImage(named: "noImage")
+                    return
+                }
+                
+                if let data = data {
+                    photo.photoImage = UIImage(data: data)
+                    image = photo.photoImage
+                    
+                } else {
+                    image = UIImage(named: "noImage")
+                }
+                
+                dispatch_async(dispatch_get_main_queue()) {
+                    cell.photo.image = image
+                }
+            }
+            
+            cell.taskToCancelifCellIsReused = task
+        }
         
         return cell
     }
     
-    func deletePhoto(sender: UIButton){
-        
-        // I want to know if the cell is selected giving the indexPath
-        let indexOfTheItem = sender.layer.valueForKey("indexPath") as! NSIndexPath
-        
-        // Get the photo associated with the indexPath
-        let photo = fetchedResultsController.objectAtIndexPath(indexOfTheItem) as! Photos
-        print("Delete cell selected from 'deletePhoto' is \(photo)")
-        
-        // When user deselected it, remove it from the selectedIndexofCollectionViewCells array
-        if let index = selectedIndexofCollectionViewCells.indexOf(indexOfTheItem){
-            selectedIndexofCollectionViewCells.removeAtIndex(index)
-        }
-        
-        // Remove the photo
+    func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
+        let photo = fetchedPhotosResultsController.objectAtIndexPath(indexPath) as! Photo
         sharedContext.deleteObject(photo)
-        
-        // Save to core data
-        CoreDataStackManager.sharedInstance().saveContext()
-        
-        // Update selected cell
-        reFetch()
-        collectionView.reloadData()
+        saveContext()
     }
     
+    // MARK: Private components
     
+    // initialize the map: disable the user interaction and set the pin
+    // in the center of the map
+    private func initializeMap() {
+        
+        let span = MKCoordinateSpan(latitudeDelta: 0.2, longitudeDelta: 0.2)
+        let centeredRegion = MKCoordinateRegion(center: pin.coordinate, span: span)
+        
+        mapView.zoomEnabled = false;
+        mapView.scrollEnabled = false;
+        mapView.userInteractionEnabled = false;
+        mapView.setRegion(centeredRegion, animated: true)
+        mapView.addAnnotation(pin)
+    }
     
+    // call the flickr API and request a new set of photos that
+    // corresponds to PIN coordinate
+    private func requestPhotosFromAPI() {
+        
+        startLoading()
+        
+        FlickrAPI.sharedInstance().findPhotosOf(pin.coordinate, inPages: Int(pin.pagesOfPhotos)) { (photos, pages, error) in
+            
+            guard error == nil else {
+                dispatch_async(dispatch_get_main_queue()) {
+                    self.endLoading(false)
+                }
+                return
+            }
+            
+            if let response = photos as? [[String:AnyObject]] {
+                
+                if response.isEmpty {
+                    dispatch_async(dispatch_get_main_queue()) {
+                        self.endLoading(false)
+                    }
+                } else {
+                    
+                    let _ = response.map() { (item: [String : AnyObject]) -> Photo in
+                        let photo = Photo(content: item, context: self.sharedContext)
+                        
+                        photo.pin = self.pin
+                        return photo
+                    }
+                    
+                    self.pin.pagesOfPhotos = pages
+                    self.saveContext()
+                    
+                    dispatch_async(dispatch_get_main_queue()) {
+                        self.endLoading(true)
+                    }
+                }
+            }
+        }
+    }
+    
+    // Refresh the UI when the loading start
+    private func startLoading() {
+        
+        newCollection.enabled = false
+        activityIndicator.hidden = false
+        collectionView.hidden = true
+        
+        activityIndicator.startAnimating()
+    }
+    
+    // Refresh the UI when the loading end
+    private func endLoading(success: Bool) {
+        
+        activityIndicator.stopAnimating()
+        activityIndicator.hidden = true
+        
+        if success {
+            collectionView.hidden = false
+            activityIndicator.hidden = true
+            newCollection.enabled = true
+            
+        } else {
+            emptyLabel.hidden = false
+            newCollection.enabled = true
+        }
+        
+    }
 }

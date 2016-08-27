@@ -10,31 +10,61 @@ import Foundation
 import CoreData
 import MapKit
 
-@objc(Pin)
-class Pin: NSManagedObject {
+// Class responsible to represent a PIN in the core data model
+class Pin: NSManagedObject, MKAnnotation {
     
+    @NSManaged var latitude: NSNumber
+    @NSManaged var longitude: NSNumber
+    @NSManaged var photos: [Photo]
+    
+    // responsible to hold the ammount of pages that this pin
+    // contains when search for photos.
+    // It used to get a new set of photos every time the user request
+    // a new collection
+    @NSManaged var pagesOfPhotos: NSNumber
+    
+    private var _coords: CLLocationCoordinate2D?
     var coordinate: CLLocationCoordinate2D {
-        return CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
+        
+        set {
+            willChangeValueForKey("coordinate")
+            _coords = newValue
+            
+            // set the new values of the lat and long
+            if let coord = _coords {
+                latitude = coord.latitude
+                longitude = coord.longitude
+            }
+            
+            didChangeValueForKey("coordinate")
+        }
+        
+        get {
+            if _coords == nil {
+                _coords = CLLocationCoordinate2DMake(latitude as CLLocationDegrees, longitude as CLLocationDegrees)
+            }
+            
+            return _coords!
+        }
     }
     
-    // In Swift, superclass initializers are not available to subclasses, so it is necessary to include this initializer and call the superclass
+    var title: String? = nil
+    var subtitle: String? = nil
     
     override init(entity: NSEntityDescription, insertIntoManagedObjectContext context: NSManagedObjectContext?) {
         super.init(entity: entity, insertIntoManagedObjectContext: context)
     }
     
-    init(lat: Double, long: Double, context: NSManagedObjectContext) {
-        let entity = NSEntityDescription.entityForName("Pin", inManagedObjectContext: context)!
-        super.init(entity: entity, insertIntoManagedObjectContext: context)
+    init(latitude: NSNumber, longitude: NSNumber, context: NSManagedObjectContext) {
         
-        self.latitude = lat
-        self.longitude = long
-        self.pageNumber = 0
+        let entity = NSEntityDescription.entityForName("Pin", inManagedObjectContext: context)
+        super.init(entity: entity!, insertIntoManagedObjectContext: context)
         
-    }
-    
-    var sharedContext: NSManagedObjectContext {
-        return CoreDataStackManager.sharedInstance().managedObjectContext
+        self.latitude = latitude
+        self.longitude = longitude
         
+        coordinate = CLLocationCoordinate2DMake(latitude as CLLocationDegrees, longitude as CLLocationDegrees)
+        
+        pagesOfPhotos = 0
     }
 }
