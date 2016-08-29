@@ -7,7 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		866F37591D73DA60002EBA5A /* downloading.png in Resources */ = {isa = PBXBuildFile; fileRef = 866F37581D73DA60002EBA5A /* downloading.png */; };
+		866F375B1D73F81A002EBA5A /* Virtual Tourist in Resources */ = {isa = PBXBuildFile; fileRef = 866F375A1D73F81A002EBA5A /* Virtual Tourist */; };
+		866F375D1D73F8AF002EBA5A /* downloading.png in Resources */ = {isa = PBXBuildFile; fileRef = 866F375C1D73F8AF002EBA5A /* downloading.png */; };
 		868373071D6E281B00159C77 /* Photo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 868373061D6E281B00159C77 /* Photo.swift */; };
 		868466CF1D57C1E4006950E4 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 868466CE1D57C1E4006950E4 /* AppDelegate.swift */; };
 		868466D11D57C1E4006950E4 /* TravelLocationsVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 868466D01D57C1E4006950E4 /* TravelLocationsVC.swift */; };
@@ -47,7 +48,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		866F37581D73DA60002EBA5A /* downloading.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = downloading.png; path = ../../../../../Desktop/downloading.png; sourceTree = "<group>"; };
+		866F375A1D73F81A002EBA5A /* Virtual Tourist */ = {isa = PBXFileReference; lastKnownFileType = folder; name = "Virtual Tourist"; sourceTree = "<group>"; };
+		866F375C1D73F8AF002EBA5A /* downloading.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = downloading.png; path = "Virtual Tourist/downloading.png"; sourceTree = "<group>"; };
 		868373061D6E281B00159C77 /* Photo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Photo.swift; sourceTree = "<group>"; };
 		868466CB1D57C1E4006950E4 /* VirtualTourist.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VirtualTourist.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		868466CE1D57C1E4006950E4 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -133,7 +135,8 @@
 		868466C21D57C1E4006950E4 = {
 			isa = PBXGroup;
 			children = (
-				866F37581D73DA60002EBA5A /* downloading.png */,
+				866F375C1D73F8AF002EBA5A /* downloading.png */,
+				866F375A1D73F81A002EBA5A /* Virtual Tourist */,
 				868466CD1D57C1E4006950E4 /* VirtualTourist */,
 				868466E21D57C1E4006950E4 /* Virtual TouristTests */,
 				868466ED1D57C1E4006950E4 /* Virtual TouristUITests */,
@@ -310,10 +313,11 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				866F37591D73DA60002EBA5A /* downloading.png in Resources */,
 				868466D91D57C1E4006950E4 /* LaunchScreen.storyboard in Resources */,
 				868466D61D57C1E4006950E4 /* Assets.xcassets in Resources */,
+				866F375D1D73F8AF002EBA5A /* downloading.png in Resources */,
 				868466D41D57C1E4006950E4 /* Main.storyboard in Resources */,
+				866F375B1D73F81A002EBA5A /* Virtual Tourist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
