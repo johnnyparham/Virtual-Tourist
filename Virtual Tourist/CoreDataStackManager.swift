@@ -8,62 +8,82 @@
 
 import Foundation
 import CoreData
+import UIKit
 
-class CoreDataStackManager {
+// The CoreDataStackManager contains the the fundamental CoreData code
+
+private let SQLITE_FILE_NAME = Constants.databaseName           // database name
+
+class CoreDataStackManager: NSObject {
+    static let sharedInstance = CoreDataStackManager()          // set up shared instance class
+    private override init() {}                                  // ensure noone will init
     
-    // MARK: Singleton instance
+    // MARK: - Managed Object Model Processing
     
-    class func sharedInstance() -> CoreDataStackManager {
-        struct Static {
-            static let instance = CoreDataStackManager()
-        }
-        
-        return Static.instance
-    }
+    // Instantiate the applicationDocumentsDirectory property
     
-    // MARK: Simplified Core data stack
+    lazy var applicationDocumentsDirectory: NSURL = {
+        
+        let urls = NSFileManager.defaultManager().URLsForDirectory(.DocumentDirectory, inDomains: .UserDomainMask).first!
+        //return urls[urls.count-1]
+        return urls
+    }()
     
-    lazy var managedObjectContext: NSManagedObjectContext = {
-        
-        let urls = NSFileManager.defaultManager().URLsForDirectory(.DocumentDirectory, inDomains: .UserDomainMask)
-        let applicationDocumentsDirectory = urls[urls.count-1]
-        
-        let modelURL = NSBundle.mainBundle().URLForResource("VirtualTouristModel", withExtension: "momd")!
-        let managedObjectModel = NSManagedObjectModel(contentsOfURL: modelURL)!
-        
-        var coordinator: NSPersistentStoreCoordinator? = NSPersistentStoreCoordinator(managedObjectModel: managedObjectModel)
-        let url = applicationDocumentsDirectory.URLByAppendingPathComponent("VirtualTouristDatabase.sqlite")
-        
+    
+    // The managed object model for the application. This property is not optional.
+    //  It is a fatal error for the application not to be able to find and load its model.
+    
+    lazy var managedObjectModel: NSManagedObjectModel = {
+        let modelURL = NSBundle.mainBundle().URLForResource(Constants.modelURL.name, withExtension: Constants.modelURL.ext)!
+        return NSManagedObjectModel(contentsOfURL: modelURL)!
+    }()
+    
+    
+    /* The Persistent Store Coordinator is an object that the Context uses to interact with the underlying file system. Usually
+     the persistent store coordinator object uses an SQLite database file to save the managed objects. But it is possible to
+     configure it to use XML or other formats.
+     
+     Typically you will construct your persistent store manager exactly like this. It needs two pieces of information in order
+     to be set up:
+     
+     - The path to the sqlite file that will be used. Usually in the documents directory
+     - A configured Managed Object Model. See the next property for details. */
+    
+    lazy var persistentStoreCoordinator: NSPersistentStoreCoordinator? = {
+        let coordinator: NSPersistentStoreCoordinator? = NSPersistentStoreCoordinator(managedObjectModel: self.managedObjectModel)
+        let url = self.applicationDocumentsDirectory.URLByAppendingPathComponent(SQLITE_FILE_NAME)
         do {
             try coordinator!.addPersistentStoreWithType(NSSQLiteStoreType, configuration: nil, URL: url, options: nil)
-        } catch {
-            
-            // Report any error we got.
-            var dict = [String: AnyObject]()
-            
-            dict[NSLocalizedDescriptionKey] = "Failed to initialize the application's saved data"
-            dict[NSLocalizedFailureReasonErrorKey] = "There was an error creating or loading the application's saved data."
-            
-            dict[NSUnderlyingErrorKey] = error as NSError
-            let wrappedError = NSError(domain: "com.andreservidoni", code: 9999, userInfo: dict)
-            
-            NSLog("Unresolved error \(wrappedError), \(wrappedError.userInfo)")
-            coordinator = nil
+        } catch let error as NSError {
+            SharedMethod.showAlert(Status.codeIs.accessSavedData(code: error.code, text:error.localizedDescription), title: "Error")
         }
-        
+        return coordinator
+    }()
+    
+    // MARK: - Managed Object Context Processing
+    
+    /* Returns the managed object context for the application (which is already bound to the persistent
+     store coordinator for the application.) This property is optional since there are legitimate error
+     conditions that could cause the creation of the context to fail.*/
+    
+    lazy var managedObjectContext: NSManagedObjectContext = {
+        let coordinator = self.persistentStoreCoordinator
         var managedObjectContext = NSManagedObjectContext(concurrencyType: .MainQueueConcurrencyType)
         managedObjectContext.persistentStoreCoordinator = coordinator
-        
         return managedObjectContext
     }()
     
-    // MARK: Core Data Saving support
     
-    func saveContext () throws {
+    // Save the managed object context for the application
+    
+    func saveContext () {
         if managedObjectContext.hasChanges {
-            
-            // every one that call this function need to handle the error
-            try managedObjectContext.save()
+            do {
+                try managedObjectContext.save()
+            } catch let error as NSError{
+                SharedMethod.showAlert(Status.codeIs.accessSavedData(code: error.code, text:error.localizedDescription), title: "Error")
+            }
         }
     }
+    
 }
