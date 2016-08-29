@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="10117" systemVersion="15G31" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="7EF-Qs-r9l">
     <dependencies>
+        <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="10085"/>
         <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
     </dependencies>
@@ -24,7 +25,7 @@
         <!--Virtual Tourist Map-->
         <scene sceneID="YMi-Sz-xBh">
             <objects>
-                <viewController storyboardIdentifier="TravelLocationsVC" title="VirtualTourist Map" id="FiY-bA-kxd" userLabel="Virtual Tourist Map" customClass="TravelLocationsVC" customModule="Virtual_Tourist" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="TravelLocationsVC" title="VirtualTourist Map" id="FiY-bA-kxd" userLabel="Virtual Tourist Map" customClass="TravelLocationsVC" customModule="VirtualTourist" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="u3V-1J-wUy"/>
                         <viewControllerLayoutGuide type="bottom" id="esI-Ts-zhs"/>
@@ -97,7 +98,7 @@
         <!--Virtual Tourist Photos-->
         <scene sceneID="qrn-AT-jrE">
             <objects>
-                <viewController storyboardIdentifier="PhotoAlbumVC" title="VirtualTourist Photos" id="8GU-Qz-h1h" userLabel="Virtual Tourist Photos" customClass="PhotoAlbumVC" customModule="Virtual_Tourist" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="PhotoAlbumVC" title="VirtualTourist Photos" id="8GU-Qz-h1h" userLabel="Virtual Tourist Photos" customClass="PhotoAlbumVC" customModule="VirtualTourist" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="td0-At-2wo"/>
                         <viewControllerLayoutGuide type="bottom" id="sMp-ME-O2C"/>
